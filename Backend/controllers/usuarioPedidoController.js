@@ -2,8 +2,8 @@ import { UsuarioPedido, Usuario, Pedido } from "../models/index.js";
 
 export const linkUsuarioPedido = async (req, res) => {
   try {
-    const { ID_USUARIO, ID_PEDIDO } = req.body;
-    await UsuarioPedido.create({ ID_USUARIO, ID_PEDIDO });
+    const { id_usuario, id_pedido } = req.body;
+    await UsuarioPedido.create({ id_usuario, id_pedido });
     res.status(201).json({ message: "Usuario asociado al pedido" });
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
@@ -11,7 +11,7 @@ export const linkUsuarioPedido = async (req, res) => {
 export const unlinkUsuarioPedido = async (req, res) => {
   try {
     const { idUsuario, idPedido } = req.params;
-    await UsuarioPedido.destroy({ where: { ID_USUARIO: idUsuario, ID_PEDIDO: idPedido } });
+    await UsuarioPedido.destroy({ where: { id_usuario: idUsuario, id_pedido: idPedido } });
     res.json({ message: "Usuario desasociado del pedido" });
   } catch (e) { res.status(500).json({ error: e.message }); }
 };

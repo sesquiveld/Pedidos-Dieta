@@ -2,9 +2,10 @@ import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
 const PedidoDieta = sequelize.define("PedidoDieta", {
-  ID_PEDIDO: { type: DataTypes.INTEGER, allowNull: false },
-  CODIGO_DIETA: { type: DataTypes.INTEGER, allowNull: false },
-  CANTIDAD: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
-}, { timestamps: false, tableName: "PedidoDieta" });
+  id_pedido: { type: DataTypes.INTEGER, allowNull: false },
+  codigo_dieta: { type: DataTypes.INTEGER, allowNull: false },
+  cantidad: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
+}, { timestamps: false, tableName: "pedidodieta" });
 
 export default PedidoDieta;
+

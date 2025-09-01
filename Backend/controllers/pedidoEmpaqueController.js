@@ -3,7 +3,7 @@ import { PedidoEmpaque, Pedido, Empaque } from "../models/index.js";
 export const addEmpaqueToPedido = async (req, res) => {
   try {
     const { ID_PEDIDO, ID_EMPAQUE } = req.body;
-    const x = await PedidoEmpaque.create({ ID_PEDIDO, ID_EMPAQUE });
+    const x = await PedidoEmpaque.create({ id_pedido, id_empaque });
     res.status(201).json(x);
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
@@ -11,7 +11,7 @@ export const addEmpaqueToPedido = async (req, res) => {
 export const removeEmpaqueFromPedido = async (req, res) => {
   try {
     const { idPedido, idEmpaque } = req.params;
-    await PedidoEmpaque.destroy({ where: { ID_PEDIDO: idPedido, ID_EMPAQUE: idEmpaque } });
+    await PedidoEmpaque.destroy({ where: { id_pedido: idPedido, id_empaque: idEmpaque } });
     res.json({ message: "Empaque eliminado del pedido" });
   } catch (e) { res.status(500).json({ error: e.message }); }
 };

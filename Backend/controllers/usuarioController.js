@@ -1,3 +1,28 @@
+/*import { Usuario } from "../models/index.js";
+
+export const listar = async (_, res) => res.json(await Usuario.findAll());
+export const obtener = async (req, res) => {
+  const r = await Cliente.findByPk(req.params.id);
+  if (!r) return res.status(404).json({ error: "No encontrado" });
+  res.json(r);
+};
+export const crear = async (req, res) => {
+  try { res.json(await Usuario.create(req.body)); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+};
+export const actualizar = async (req, res) => {
+  const r = await Usuario.findByPk(req.params.id);
+  if (!r) return res.status(404).json({ error: "No encontrado" });
+  await r.update(req.body); res.json(r);
+};
+export const eliminar = async (req, res) => {
+  const r = await Usuario.findByPk(req.params.id);
+  if (!r) return res.status(404).json({ error: "No encontrado" });
+  await r.destroy(); res.json({ ok: true });
+};
+
+*/
+
 import { Usuario } from "../models/index.js";
 
 export const createUsuario = async (req, res) => {
