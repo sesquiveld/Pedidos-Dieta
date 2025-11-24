@@ -1,25 +1,19 @@
-/*import { Router } from "express";
-import { listar, obtener, crear, actualizar, eliminar } from "../controllers/usuarioController.js";
-const router = Router();
 
-router.get("/", listar);
-router.get("/:id", obtener);
-router.post("/", crear);
-router.put("/:id", actualizar);
-router.delete("/:id", eliminar);
-
-export default router;
-*/
-
-import { Router } from "express";
+import express from "express";
 import {
-  createUsuario, getUsuarios, getUsuarioById, updateUsuario, deleteUsuario
+  getUsuarios,
+  createUsuario,
+  updateUsuario,
+  deleteUsuario,
 } from "../controllers/usuarioController.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
-const router = Router();
-router.post("/", createUsuario);
-router.get("/", getUsuarios);
-router.get("/:id", getUsuarioById);
-router.put("/:id", updateUsuario);
-router.delete("/:id", deleteUsuario);
+const router = express.Router();
+
+// Todas protegidas
+router.get("/", authMiddleware, getUsuarios);
+router.post("/", authMiddleware, createUsuario);
+router.put("/:id_usuario", authMiddleware, updateUsuario);
+router.delete("/:id_usuario", authMiddleware, deleteUsuario);
+
 export default router;

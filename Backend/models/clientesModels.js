@@ -15,6 +15,7 @@ const Cliente = sequelize.define("Cliente", {
  {
   tableName: "cliente", // 👈 muy importante
   timestamps: false,    // si no tienes createdAt / updatedAt en la tabla
+  freezeTableName: true, 
 });
 
 export default Cliente;

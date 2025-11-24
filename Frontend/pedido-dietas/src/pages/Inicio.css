@@ -1,0 +1,19 @@
+.inicio-container {
+  text-align: center;
+  padding: 60px;
+}
+
+.inicio-img {
+  max-width: 400px;
+  margin-bottom: 20px;
+}
+
+.btn-login {
+  padding: 12px 24px;
+  background-color: #7ca56c;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}

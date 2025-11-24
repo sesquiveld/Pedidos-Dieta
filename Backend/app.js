@@ -15,6 +15,8 @@ import pedidoDietaRoutes from "./routes/pedidoDietaRoutes.js";
 import pedidoEmpaqueRoutes from "./routes/pedidoEmpaqueRoutes.js";
 import usuarioPedidoRoutes from "./routes/usuarioPedidoRoutes.js";
 
+import reportesRoutes from "./routes/reportesRoutes.js";
+
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173" })); // Vite por defecto
@@ -31,6 +33,8 @@ app.use("/cliente-areas", clienteAreaRoutes);
 app.use("/pedido-dietas", pedidoDietaRoutes);
 app.use("/pedido-empaques", pedidoEmpaqueRoutes);
 app.use("/usuario-pedidos", usuarioPedidoRoutes);
+
+app.use("/api/reportes", reportesRoutes);
 
 // Probar conexión con MySQL
 (async () => {
@@ -52,16 +56,3 @@ app.use("/usuario-pedidos", usuarioPedidoRoutes);
   }
 })();
 
-
-/*
-(async () => {
-  try {
-    await sequelize.authenticate();
-    await sequelize.sync({ alter: true });
-    console.log("✅ DB OK");
-    const PORT = 4000;
-    app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
-  } catch (e) {
-    console.error("❌ DB error:", e);
-  }
-*/

@@ -1,11 +1,17 @@
 import { Router } from "express";
 import {
-  addDietaToPedido, updateCantidadDieta, removeDietaFromPedido, getDietasDePedido
+  addDietaToPedido,
+  updateCantidadDieta,
+  removeDietaFromPedido,
+  getDietasDePedido
 } from "../controllers/pedidoDietaController.js";
 
 const router = Router();
-router.post("/", addDietaToPedido); // body: {ID_PEDIDO, CODIGO_DIETA, CANTIDAD}
+router.post("/", addDietaToPedido);
 router.put("/:idPedido/:idDieta", updateCantidadDieta);
 router.delete("/:idPedido/:idDieta", removeDietaFromPedido);
-router.get("/pedido/:idPedido", getDietasDePedido);
+router.get("/:idPedido", getDietasDePedido);
+
 export default router;
+
+

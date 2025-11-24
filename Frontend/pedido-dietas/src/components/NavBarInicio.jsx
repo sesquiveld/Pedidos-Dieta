@@ -1,18 +1,12 @@
-//"use client"
-
 import { Link, useLocation } from "react-router-dom"
 import "./Navbar.css"
 
-const Navbar = () => {
+const NavbarInicio = () => {
   const location = useLocation()
 
   const navItems = [
     { path: "/", label: "Inicio", icon: "🏠" },
-    { path: "/clientes", label: "Clientes", icon: "👥" },
-    { path: "/areas", label: "Áreas", icon: "🏢" },
-    { path: "/empaques", label: "Empaques", icon: "📦" },
-    { path: "/usuarios", label: "Usuarios", icon: "👤" },
-    { path: "/pedidos", label: "Pedidos", icon: "📋" },
+    
   ]
 
   return (
@@ -34,4 +28,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
+export default NavbarInicio;

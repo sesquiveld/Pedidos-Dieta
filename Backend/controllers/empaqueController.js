@@ -1,61 +1,106 @@
-/*import { Empaque } from "../models/index.js";
+// empaqueController.js
+import Empaque from "../models/empaqueModels.js";
 
-export const listar = async (_, res) => res.json(await Empaque.findAll());
-export const obtener = async (req, res) => {
-  const r = await Empaque.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  res.json(r);
+// Obtener todos los empaques
+export const getEmpaques = async (req, res) => {
+  try {
+    const empaques = await Empaque.findAll();
+    res.json(empaques);
+  } catch (error) {
+    console.error("Error obteniendo empaques:", error);
+    res.status(500).json({ error: "Error al obtener los empaques" });
+  }
 };
-export const crear = async (req, res) => {
-  try { res.json(await Empaque.create(req.body)); }
-  catch (e) { res.status(400).json({ error: e.message }); }
-};
-export const actualizar = async (req, res) => {
-  const r = await Empaque.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  await r.update(req.body); res.json(r);
-};
-export const eliminar = async (req, res) => {
-  const r = await Empaque.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  await r.destroy(); res.json({ ok: true });
-};
-*/
 
-import { Empaque } from "../models/index.js";
-
+// Crear nuevo empaque
 export const createEmpaque = async (req, res) => {
-  try { const x = await Empaque.create(req.body); res.status(201).json(x); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    const { id_empaque, nombre_empaque, caracteristicas, precio_empaque } = req.body;
+
+    // Validaciones
+
+    if (!id_empaque || isNaN(Number(id_empaque))) {
+      return res.status(400).json({ error: "El campo id_empaque es obligatorio y debe ser numérico" });
+    }
+    if (!nombre_empaque || nombre_empaque.trim() === "") {
+      return res.status(400).json({ error: "El campo nombre_empaque es obligatorio" });
+    }
+    if (!caracteristicas || caracteristicas.trim() === "") {
+      return res.status(400).json({ error: "El campo caracteristicas es obligatorio" });
+    }
+    if (precio_empaque == null || isNaN(Number(precio_empaque))) {
+      return res.status(400).json({ error: "El campo precio_empaque es obligatorio y debe ser numérico" });
+    }
+ 
+    const empaque = await Empaque.create({
+      id_empaque: Number(id_empaque),
+      nombre_empaque,
+      precio_empaque: precio_empaque || null,
+      caracteristicas: caracteristicas || null,
+    });
+    
+    res.status(201).json(empaque);
+  } catch (error) {
+    console.error("Error creando empaque:", error);
+    res.status(400).json({ error: error.message });
+  }
 };
 
-export const getEmpaques = async (_req, res) => {
-  try { res.json(await Empaque.findAll()); }
-  catch (e) { res.status(500).json({ error: e.message }); }
-};
-
+// Obtener empaque por ID
 export const getEmpaqueById = async (req, res) => {
   try {
-    const x = await Empaque.findByPk(req.params.id);
-    if (!x) return res.status(404).json({ error: "Empaque no encontrado" });
-    res.json(x);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const empaque = await Empaque.findByPk(req.params.id);
+    if (!empaque) {
+      return res.status(404).json({ error: "Empaque no encontrado" });
+    }
+    res.json(empaque);
+  } catch (error) {
+    console.error("Error obteniendo empaque:", error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
+// Actualizar empaque
 export const updateEmpaque = async (req, res) => {
   try {
-    const x = await Empaque.findByPk(req.params.id);
-    if (!x) return res.status(404).json({ error: "Empaque no encontrado" });
-    await x.update(req.body);
-    res.json(x);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const { id } = req.params;
+    const { nombre_empaque, caracteristicas, precio_empaque } = req.body;
+
+    const empaque = await Empaque.findByPk(id);
+    if (!empaque) {
+      return res.status(404).json({ error: "Empaque no encontrado" });
+    }
+
+    await empaque.update({
+      nombre_empaque: nombre_empaque ?? empaque.nombre_empaque,
+      caracteristicas: caracteristicas ?? empaque.caracteristicas,
+      precio_empaque: precio_empaque != null ? Number(precio_empaque) : empaque.precio_empaque,
+    });
+
+    res.json(empaque);
+  } catch (error) {
+    console.error("Error actualizando empaque:", error);
+    res.status(400).json({ error: error.message });
+  }
 };
 
+// Eliminar empaque
 export const deleteEmpaque = async (req, res) => {
   try {
-    const x = await Empaque.findByPk(req.params.id);
-    if (!x) return res.status(404).json({ error: "Empaque no encontrado" });
-    await x.destroy();
-    res.json({ message: "Empaque eliminado" });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const { id } = req.params;
+    const empaque = await Empaque.findByPk(id);
+    if (!empaque) {
+      return res.status(404).json({ error: "Empaque no encontrado" });
+    }
+    await empaque.destroy();
+    res.json({ message: "Empaque eliminado correctamente" });
+  } catch (error) {
+    console.error("Error eliminando empaque:", error);
+    res.status(400).json({ error: error.message });
+  }
 };
+
+
+
+
+

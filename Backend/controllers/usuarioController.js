@@ -1,62 +1,103 @@
-/*import { Usuario } from "../models/index.js";
+import bcrypt from "bcryptjs";
+import Usuario from "../models/usuarioModels.js";
 
-export const listar = async (_, res) => res.json(await Usuario.findAll());
-export const obtener = async (req, res) => {
-  const r = await Cliente.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  res.json(r);
-};
-export const crear = async (req, res) => {
-  try { res.json(await Usuario.create(req.body)); }
-  catch (e) { res.status(400).json({ error: e.message }); }
-};
-export const actualizar = async (req, res) => {
-  const r = await Usuario.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  await r.update(req.body); res.json(r);
-};
-export const eliminar = async (req, res) => {
-  const r = await Usuario.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  await r.destroy(); res.json({ ok: true });
-};
+// ====================== CRUD ======================
 
-*/
-
-import { Usuario } from "../models/index.js";
-
-export const createUsuario = async (req, res) => {
-  try { const x = await Usuario.create(req.body); res.status(201).json(x); }
-  catch (e) { res.status(500).json({ error: e.message }); }
-};
-
-export const getUsuarios = async (_req, res) => {
-  try { res.json(await Usuario.findAll()); }
-  catch (e) { res.status(500).json({ error: e.message }); }
-};
-
-export const getUsuarioById = async (req, res) => {
+// Obtener todos los usuarios
+export const getUsuarios = async (req, res) => {
   try {
-    const x = await Usuario.findByPk(req.params.id);
-    if (!x) return res.status(404).json({ error: "Usuario no encontrado" });
-    res.json(x);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const usuarios = await Usuario.findAll({
+      attributes: { exclude: ["contrasena"] }, // no mostrar la contraseña
+    });
+    res.json(usuarios);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
+// Crear un usuario nuevo
+export const createUsuario = async (req, res) => {
+  try {
+    const { id_usuario, nombre_usuario, correo_usuario, contrasena, tipo_usuario, ACTIVO } = req.body;
+
+    // Validaciones mínimas
+    if (!id_usuario || !nombre_usuario || !correo_usuario || !contrasena || !tipo_usuario) {
+      return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+
+    // Hashear contraseña
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(contrasena, salt);
+
+    const nuevoUsuario = await Usuario.create({
+      id_usuario,
+      nombre_usuario,
+      correo_usuario,
+      contrasena: hashedPassword,
+      tipo_usuario,
+      ACTIVO: ACTIVO ?? true,
+    });
+
+    res.status(201).json({
+      id_usuario: nuevoUsuario.id_usuario,
+      nombre_usuario: nuevoUsuario.nombre_usuario,
+      correo_usuario: nuevoUsuario.correo_usuario,
+      tipo_usuario: nuevoUsuario.tipo_usuario,
+      ACTIVO: nuevoUsuario.ACTIVO,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Actualizar un usuario
 export const updateUsuario = async (req, res) => {
   try {
-    const x = await Usuario.findByPk(req.params.id);
-    if (!x) return res.status(404).json({ error: "Usuario no encontrado" });
-    await x.update(req.body);
-    res.json(x);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const { id } = req.params;
+    const { nombre_usuario, correo_usuario, contrasena, tipo_usuario, ACTIVO } = req.body;
+
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    let newPassword = usuario.contrasena;
+    if (contrasena) {
+      const salt = await bcrypt.genSalt(10);
+      newPassword = await bcrypt.hash(contrasena, salt);
+    }
+
+    await usuario.update({
+      nombre_usuario: nombre_usuario ?? usuario.nombre_usuario,
+      correo_usuario: correo_usuario ?? usuario.correo_usuario,
+      contrasena: newPassword,
+      tipo_usuario: tipo_usuario ?? usuario.tipo_usuario,
+      ACTIVO: ACTIVO ?? usuario.ACTIVO,
+    });
+
+    res.json({
+      id_usuario: usuario.id_usuario,
+      nombre_usuario: usuario.nombre_usuario,
+      correo_usuario: usuario.correo_usuario,
+      tipo_usuario: usuario.tipo_usuario,
+      ACTIVO: usuario.ACTIVO,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
+// Eliminar un usuario
 export const deleteUsuario = async (req, res) => {
   try {
-    const x = await Usuario.findByPk(req.params.id);
-    if (!x) return res.status(404).json({ error: "Usuario no encontrado" });
-    await x.destroy();
-    res.json({ message: "Usuario eliminado" });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const { id } = req.params;
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    await usuario.destroy();
+    res.json({ message: "Usuario eliminado correctamente" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
+
+
+

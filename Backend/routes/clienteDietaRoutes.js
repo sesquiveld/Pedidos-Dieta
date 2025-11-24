@@ -1,10 +1,18 @@
-import { Router } from "express";
+// backend/routes/clienteDietaRoutes.js
+import express from "express";
 import {
-  addDietaToCliente, removeDietaFromCliente, getDietaDeCliente
+  getClienteDietas,
+  createClienteDieta,
+  updateClienteDieta,
+  deleteClienteDieta,
 } from "../controllers/clienteDietaController.js";
 
-const router = Router();
-router.post("/", addDietaToCliente); // body: {ID_PEDIDO, ID_EMPAQUE}
-router.delete("/:coddieta/:idcliente", removeDietaFromCliente);
-router.get("/dieta/:coddieta", getDietaDeCliente);
+const router = express.Router();
+
+router.get("/", getClienteDietas);
+router.post("/", createClienteDieta);
+router.put("/:id_cliente/:codigo_dieta", updateClienteDieta);
+router.delete("/:id_cliente/:codigo_dieta", deleteClienteDieta);
+
 export default router;
+

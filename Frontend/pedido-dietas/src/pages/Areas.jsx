@@ -1,20 +1,28 @@
+// Areas.jsx
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Modal from "../components/Modal";
 import "./Pages.css";
 
-const API_URL = "http://localhost:4000/api/clientes";
+const API_URL = "http://localhost:4000/api/areas";
 
 const Areas = () => {
-  const [Area, setArea] = useState([]);
+  const navigate = useNavigate();
+  const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null); // id del cliente que se edita
+  const [editing, setEditing] = useState(null); // id del area que se edita
   const [formData, setFormData] = useState({
-    id_Are: "",
-    nombre: "",
+    id_area: "",
+    nombre_area: "",
     descripcion: "",
     ubicacion: "",
   });
+
+  const [modalMessage, setModalMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
+
 
   useEffect(() => {
     loadAreas();
@@ -23,7 +31,8 @@ const Areas = () => {
   const loadAreas = async () => {
     try {
       const { data } = await axios.get(API_URL);
-      setArea(data);
+      //const { data } = await axios.get("/areas");
+      setAreas(data);
     } catch (error) {
       console.error("Error cargando Areas:", error);
     } finally {
@@ -37,44 +46,64 @@ const Areas = () => {
       if (editing) {
         // actualizar
         await axios.put(`${API_URL}/${editing}`, formData);
-        alert("Area actualizado correctamente");
+        setModalMessage("✅ Área actualizada correctamente");
+        setShowModal(true);
+        //alert("Área actualizada correctamente");
       } else {
         // crear
         await axios.post(API_URL, formData);
-        alert("Area agregada exitosamente");
+        setModalMessage("✅ Área agregada exitosamente");
+        setShowModal(true);
+        //alert("Área agregada exitosamente");
       }
 
       setFormData({
         id_area: "",
         nombre_area: "",
-        ubicacion: "",
         descripcion: "",
-        
+        ubicacion: "",
       });
       setShowForm(false);
       setEditing(null);
       loadAreas();
     } catch (error) {
-      console.error("Error guardando Area:", error);
-      alert("Error al guardar el Area");
+      console.error("Error guardando Área:", error);
+
+      // si backend devuelve mensaje útil, mostrarlo
+      const msg = error.response?.data?.error || error.message;
+      setModalMessage("❌ Error al guardar el área: " + msg);
+      setShowModal(true);
+      //alert("Error al guardar el área: " + msg);
     }
   };
-/*
+
   const handleEdit = (area) => {
-    setFormData(area);
-    setEditing(area.id_area);
+    // Aseguramos que las keys existan con los nombres correctos
+    setFormData({
+      id_area: area.id_area ?? area.ID_AREA ?? area.id ?? "",
+      nombre_area: area.nombre ?? area.NOMBRE_AREA ?? "",
+      descripcion: area.descripcion ?? area.DESCRIPCION ?? "",
+      ubicacion: area.ubicacion ?? area.UBICACION ?? "",
+    });
+    // set editing to the primary key the backend expects; aquí asumo id_area
+    setEditing(area.id_area ?? area.ID_AREA ?? area.id ?? null);
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Seguro que deseas eliminar el area?")) return;
+    if (!window.confirm("¿Seguro que deseas eliminar el área?")) return;
     try {
       await axios.delete(`${API_URL}/${id}`);
-      alert("Area eliminado correctamente");
+      setModalMessage("✅ Área eliminada correctamente");
+      setShowModal(true);
+      //alert("Área eliminada correctamente");
       loadAreas();
     } catch (error) {
-      console.error("Error eliminando el area:", error);
-      alert("Error al eliminar area");
+      console.error("Error eliminando área:", error);
+      const msg = error.response?.data?.error || error.message;
+      setModalMessage("❌ Error al eliminar área: " + msg);
+      setShowModal(true);
+      //alert("Error al eliminar área: " + msg);
     }
   };
 
@@ -84,202 +113,83 @@ const Areas = () => {
       [e.target.name]: e.target.value,
     });
   };
-*/
-  if (loading) {
-    return <div className="loading">Cargando Areas...</div>;
-  }
-
-
-  return (
-    <div className="page-container">
-      <h1>🏢 Gestión de Áreas</h1>
-      <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
-        {showForm ? "Cancelar" : "Nueva Área"}
-      </button>
-
-      {showForm && (
-        <form onSubmit={handleSubmit} className="form-container">
-          <input
-            type="text"
-            name="nombre"
-            placeholder="Nombre del área"
-            value={formData.nombre}
-            onChange={(e) => setFormData({ nombre: e.target.value })}
-            required
-          />
-          <button type="submit" className="btn-success">Guardar</button>
-        </form>
-      )}
-
-      <div className="table-container">
-        <h2>Lista de Áreas ({Areas.length})</h2>
-        <table className="data-table">
-          <thead>
-            <tr><th>ID</th>
-            <th>Nombre</th></tr>
-          </thead>
-          <tbody>
-            {Areas.map((a) => (
-              <tr key={a.id}>
-              <td>{a.id}</td>
-              <td>{a.nombre}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
-export default Areas
-
-
-
-
-/*import { useEffect, useState } from "react";
-import { listarAreas, crearArea } from "../services/catalogosService.js";
-
-export default function Areas() {
-  const [areas, setAreas] = useState([]);
-  const [form, setForm] = useState({ ID_AREA: "", NOMBRE_AREA: "" , DESCRIPCION:"", UBICACION:""});
-
-  useEffect(() => { listarAreas().then(setAreas); }, []);
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    await crearArea({ ID_AREA: Number(form.ID_AREA), NOMBRE_AREA: form.NOMBRE_AREA });
-    setAreas(await listarAreas());
-    setForm({ ID_AREA: "", NOMBRE_AREA: "" });
-  };
-
-  return (
-    <div style={{ padding: 24 }}>
-      <h2>Áreas</h2>
-      <form onSubmit={onSubmit} style={{ display: "flex", gap: 8 }}>
-        <input placeholder="ID_AREA" value={form.ID_AREA} onChange={e=>setForm({...form, ID_AREA: e.target.value})}/>
-        <input placeholder="NOMBRE_AREA" value={form.NOMBRE_AREA} onChange={e=>setForm({...form, NOMBRE_AREA: e.target.value})}/>
-         <input placeholder="DESCRIPCION" value={form.NOMBRE_AREA} onChange={e=>setForm({...form, DESCRIPCION: e.target.value})}/>
-          <input placeholder="UBICACION" value={form.NOMBRE_AREA} onChange={e=>setForm({...form, UBICACION: e.target.value})}/>
-        <button>Agregar</button>
-      </form>
-      <ul>
-        {areas.map(a => <li key={a.ID_AREA}>{a.ID_AREA} — {a.NOMBRE_AREA}</li>)}
-      </ul>
-    </div>
-  );
-}
-
-*/
-
-/*
-
-"use client"
-
-import { useState, useEffect } from "react"
-import "./Pages.css"
-
-const Areas = () => {
-  const [areas, setAreas] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [formData, setFormData] = useState({
-    nombre: "",
-    descripcion: "",
-    ubicacion: "",
-  })
-
-  useEffect(() => {
-    loadAreas()
-  }, [])
-
-  const loadAreas = async () => {
-    try {
-      const response = await fetch("http://localhost:4000/api/areas")
-      if (response.ok) {
-        const data = await response.json()
-        setAreas(data)
-      }
-    } catch (error) {
-      console.error("Error loading areas:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      const response = await fetch("http://localhost:4000/api/areas", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        setFormData({ nombre: "", descripcion: "", ubicacion: "" })
-        setShowForm(false)
-        loadAreas()
-        alert("Área agregada exitosamente")
-      }
-    } catch (error) {
-      console.error("Error adding area:", error)
-      alert("Error al agregar área")
-    }
-  }
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
 
   if (loading) {
-    return <div className="loading">Cargando áreas...</div>
+    return <div className="loading">Cargando Áreas...</div>;
   }
+
+const navigateHome = () => {
+  const user = JSON.parse(localStorage.getItem("usuario")); // o usa tu contexto si lo tienes
+  if (user?.tipo_usuario === "Administrador") {
+    navigate("/home-admin");
+  } else {
+    navigate("/home-user");
+  }
+};
 
   return (
     <div className="page-container">
       <div className="page-header">
         <h1>🏢 Gestión de Áreas</h1>
-        <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
+        <button className="btn-primary" onClick={() => { 
+                            setShowForm(!showForm); 
+                            if (!showForm) {
+                              setFormData({ id_area:"", nombre_area:"", descripcion:"", ubicacion:"" }); 
+                              setEditing(null); 
+                              }
+                          }
+        }>
           {showForm ? "Cancelar" : "Nueva Área"}
         </button>
+        
+         <button
+            type="button"
+            onClick={navigateHome}
+            className="bg-blue-400 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+          >
+            🔙 Volver al inicio
+          </button>
       </div>
 
       {showForm && (
         <div className="form-container">
-          <h2>Agregar Nueva Área</h2>
+          <h2>{editing ? "Editar Área" : "Agregar Nueva Área"}</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
               <input
                 type="text"
-                name="nombre"
+                name="id_area"
+                placeholder="ID Área"
+                value={formData.id_area}
+                onChange={handleInputChange}
+                required
+                disabled={!!editing} // No permitir editar la PK
+              />
+              <input
+                type="text"
+                name="nombre_area"
                 placeholder="Nombre del área"
-                value={formData.nombre}
+                value={formData.nombre_area}
                 onChange={handleInputChange}
                 required
               />
               <input
                 type="text"
                 name="ubicacion"
-                placeholder="Ubicación"
+                placeholder="Ubicación del área"
                 value={formData.ubicacion}
                 onChange={handleInputChange}
               />
-              <textarea
+              <input
+                type="text"
                 name="descripcion"
-                placeholder="Descripción"
+                placeholder="Descripción del área"
                 value={formData.descripcion}
                 onChange={handleInputChange}
-                rows="3"
               />
             </div>
             <button type="submit" className="btn-success">
-              Guardar Área
+              {editing ? "Actualizar" : "Guardar"}
             </button>
           </form>
         </div>
@@ -301,15 +211,17 @@ const Areas = () => {
               </tr>
             </thead>
             <tbody>
-              {areas.map((area) => (
-                <tr key={area.id}>
-                  <td>{area.id}</td>
-                  <td>{area.nombre}</td>
-                  <td>{area.ubicacion}</td>
-                  <td>{area.descripcion}</td>
+              {areas.map((a) => (
+                <tr key={a.id_area ?? a.ID_AREA ?? a.id}>
+                  <td>{a.id_area ?? a.ID_AREA ?? a.id}</td>
+                  <td>{a.nombre_area ?? a.NOMBRE_AREA}</td>
+                  <td>{a.ubicacion ?? a.UBICACION}</td>
+                  <td>{a.descripcion ?? a.DESCRIPCION}</td>
                   <td>
-                    <button className="btn-edit">Editar</button>
-                    <button className="btn-delete">Eliminar</button>
+                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition" onClick={() => handleEdit(a)}>Editar</button>
+                  </td>
+                  <td>  
+                    <button className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition" onClick={() => handleDelete(a.id_area ?? a.ID_AREA ?? a.id)}>Eliminar</button>
                   </td>
                 </tr>
               ))}
@@ -317,10 +229,17 @@ const Areas = () => {
           </table>
         )}
       </div>
+      {/* Modal */}
+      <Modal
+        show={showModal}
+        message={modalMessage}
+        onClose={() => setShowModal(false)}
+      />
     </div>
-  )
-}
+  );
+};
 
-export default Areas
+export default Areas;
 
-*/
+
+

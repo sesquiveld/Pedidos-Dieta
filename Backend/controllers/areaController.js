@@ -1,38 +1,45 @@
-/*import { Area } from "../models/index.js";
 
-export const listar = async (_, res) => res.json(await Area.findAll());
-export const obtener = async (req, res) => {
-  const r = await Area.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  res.json(r);
-};
-export const crear = async (req, res) => {
-  try { res.json(await Area.create(req.body)); }
-  catch (e) { res.status(400).json({ error: e.message }); }
-};
-export const actualizar = async (req, res) => {
-  const r = await Area.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  await r.update(req.body); res.json(r);
-};
-export const eliminar = async (req, res) => {
-  const r = await Area.findByPk(req.params.id);
-  if (!r) return res.status(404).json({ error: "No encontrado" });
-  await r.destroy(); res.json({ ok: true });
+// areaController.js
+import Area from "../models/areaModels.js"; 
+
+
+
+// Obtener todas las áreas
+export const getAreas = async (req, res) => {
+  try {
+    const areas = await Area.findAll();
+    res.json(areas);
+  } catch (error) {
+    console.error("Error obteniendo áreas:", error);
+    res.status(500).json({ error: "Error al obtener las áreas" });
+  }
 };
 
-*/
-
-import { Area } from "../models/index.js";
-
+// Crear nueva área
 export const createArea = async (req, res) => {
-  try { const x = await Area.create(req.body); res.status(201).json(x); }
-  catch (e) { res.status(500).json({ error: e.message }); }
-};
+  try {
+    const { id_area, nombre_area, descripcion, ubicacion } = req.body;
 
-export const getAreas = async (_req, res) => {
-  try { res.json(await Area.findAll()); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+    // Validación básica
+    if (!id_area || isNaN(Number(id_area))) {
+      return res.status(400).json({ error: "El campo id_area es obligatorio y debe ser numérico" });
+    }
+    if (!nombre_area || nombre_area.trim() === "") {
+      return res.status(400).json({ error: "El campo nombre es obligatorio" });
+    }
+
+    const area = await Area.create({
+      id_area: Number(id_area),
+      nombre_area,
+      descripcion: descripcion || null,
+      ubicacion: ubicacion || null,
+    });
+
+    res.status(201).json(area);
+  } catch (error) {
+    console.error("Error creando área:", error);
+    res.status(400).json({ error: error.message });
+  }
 };
 
 export const getAreaById = async (req, res) => {
@@ -43,20 +50,45 @@ export const getAreaById = async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
+
+// Actualizar área
 export const updateArea = async (req, res) => {
   try {
-    const x = await Area.findByPk(req.params.id);
-    if (!x) return res.status(404).json({ error: "Área no encontrada" });
-    await x.update(req.body);
-    res.json(x);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const { id } = req.params;
+    const { nombre_area, descripcion, ubicacion } = req.body;
+
+    const area = await Area.findByPk(id);
+    if (!area) {
+      return res.status(404).json({ error: "Área no encontrada" });
+    }
+
+    await area.update({
+      nombre_area: nombre_area ?? area.nombre_area,
+      descripcion: descripcion ?? area.descripcion,
+      ubicacion: ubicacion ?? area.ubicacion,
+    });
+
+    res.json(area);
+  } catch (error) {
+    console.error("Error actualizando área:", error);
+    res.status(400).json({ error: error.message });
+  }
 };
 
+// Eliminar área
 export const deleteArea = async (req, res) => {
   try {
-    const x = await Area.findByPk(req.params.id);
-    if (!x) return res.status(404).json({ error: "Área no encontrada" });
-    await x.destroy();
-    res.json({ message: "Área eliminada" });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const { id } = req.params;
+    const area = await Area.findByPk(id);
+    if (!area) {
+      return res.status(404).json({ error: "Área no encontrada" });
+    }
+    await area.destroy();
+    res.json({ message: "Área eliminada correctamente" });
+  } catch (error) {
+    console.error("Error eliminando área:", error);
+    res.status(400).json({ error: error.message });
+  }
 };
+
+
